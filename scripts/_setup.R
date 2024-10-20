@@ -26,8 +26,10 @@ pacman::p_load(
   here,       # easy file paths
   see,        # theme_modern and okabeito palette
   report,     # reporting various info 
+  # ----- Simulation
+  sn,         # simulate skew normal distributions
+  scales,     # for rescaling
   # Should remain last to avoid conflicts with other packages
-  quarto,     # quarto reports
   tidyverse   # modern R ecosystem
 )
 
