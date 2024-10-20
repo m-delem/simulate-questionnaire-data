@@ -1,4 +1,5 @@
-# Simulating Likert-type questionnaire data with R <img src='images/likert.png' align="right" width="250" />
+# Simulating Likert-type questionnaire data with R  
+<img src='images/likert.png' align="left" width="200" /> 
 
 I have been working on multiple projects that involved analysing several questionnaires with "Likert scales", i.e. ordinal variables or pseudo-continuous variables obtained by summing all the ordinal items. Before engaging into the experiments proper, robust power analyses, code testing, sanity checks, etc. should be conducted to ensure that the data collection and analysis will be as smooth as possible. In several complex settings such as multivariate analyses or multilevel modelling, simulating data can be a powerful tool to test the code, the power of the analyses, the robustness of the models, etc. 
 
