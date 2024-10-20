@@ -29,7 +29,7 @@ execute:
   error: false
   message: false
 
-toc: true
+toc: false
 number-sections: true
 crossref:
   chapters: true
@@ -56,7 +56,7 @@ format:
     
     # interactive features
     lightbox: true          # clickable figures
-    code-fold: true         # code folding for clarity
+    code-fold: false         # code folding for clarity
     code-tools: true        # hide or show all code
     code-annotations: hover # show code annotations on hover
     
@@ -65,28 +65,3 @@ format:
     toc-depth: 2
     toc-expand: 1
     number-depth: 2
-
-  # Word
-  # docx: 
-  #   reference-doc: "utils/docx/custom-reference-doc.docx"
-  #   toc: false
-  #   echo: false
-  #   # extension to add a block with authors in .docx format
-  #   filters:
-  #     - authors-block
-
-  # PDF - see https://github.com/quarto-journals/elsevier
-  # elsevier-pdf:
-  #   toc: false
-  #   echo: false
-  #   journal:
-  #     cite-style: authoryear    
-  #   # the option to include a new page after the abstract is commented out
-  #   # the second one is to include a new page after the table of contents
-  #   include-in-header:
-  #     text: |
-  #       % \newpageafter{abstract}
-  #       \let\tableofcontentsORIG\tableofcontents
-  #       \renewcommand\tableofcontents{\tableofcontentsORIG\clearpage}
-
-
