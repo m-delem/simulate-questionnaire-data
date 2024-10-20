@@ -66,10 +66,17 @@ simulate_items <- function(
 
 simulate_vviq <- function(
     n_subjects = 500,
-    plot = TRUE,
     add_items = FALSE,
-    return_data = TRUE
+    return_data = TRUE,
+    print_plot  = FALSE,
+    return_plot = FALSE,
+    var_to_plot = "score"
 ) {
+  
+  if ((print_plot | return_plot) & !(var_to_plot %in% c("score", "mean"))){
+    stop('var_to_plot must be either "score" or "mean".')
+  }
+  
   # Means for aphantasia, hypophantasia, typical and hyperphantasia groups
   group_means <- c(16, 24, 53, 77)
   # Probabilities for each group from Wright et al. (2024)
@@ -94,7 +101,7 @@ simulate_vviq <- function(
         24 ~ "hypo",
         53 ~ "typical",
         77 ~ "hyper"
-      ),
+      ) |> factor(levels = c("aph", "hypo", "typical", "hyper")),
       # We define the score ranges for each group
       score_range = case_match(
         group,
@@ -131,28 +138,25 @@ simulate_vviq <- function(
     select(subject, group, score_vviq, mean_vviq, contains("item"))
   
   # Option to plot the distribution straight away
-  if (plot) {
+  if (print_plot | return_plot) {
     p <- 
       df |> 
-      ggplot(aes(x = score_vviq, colour = group, fill = group)) + 
-      geom_density(
-        aes(y = after_stat(count), fill = NULL), 
-        colour = "red",
-        linewidth = 0.5,
-        show.legend = FALSE
-      ) +
-      geom_histogram(alpha = 0.4, binwidth = 1) +
+      ggplot(aes(
+        x = .data[[paste0(var_to_plot, "_vviq")]], 
+        colour = group,
+        fill = group
+        )
+      ) + 
       scale_y_continuous(expand = expansion(c(0,0.1))) +
       scale_x_continuous(
         expand = expansion(c(0,0)),
-        breaks = breaks_pretty(30)
+        breaks = breaks_pretty(20)
       ) +
       labs(
         title = "Simulated VVIQ distribution",
         colour = "Group",
         fill = "Group",
-        x = "VVIQ total score",
-        y = "Count"
+        x = paste0("VVIQ ", var_to_plot)
       ) +
       theme_modern() +
       theme(
@@ -160,15 +164,36 @@ simulate_vviq <- function(
         panel.grid.minor.y = element_line(colour = "grey90"),
         axis.text.x = element_text(size = 10),
         axis.ticks.x = element_line(),
-        )
+      )
     
-    print(p)
+    if (var_to_plot == "score") {
+      p <- p +
+        geom_histogram(binwidth = 1, alpha = 0.4) +
+        geom_density(
+          aes(y = after_stat(count), fill = NULL),
+          colour = "red",
+          linewidth = 0.5,
+          show.legend = FALSE
+        ) + labs(y = "Count")
+    } else {
+      p <-
+        p +
+        geom_histogram(binwidth = 0.2, alpha = 0.4) +
+        geom_density(
+          aes(y = after_stat(count)/5, fill = NULL),
+          colour = "red",
+          linewidth = 0.5,
+          show.legend = FALSE
+        ) + labs(y = "Count")
+    }
   }
   
   # We can remove the individual items if unnecessary
   if (!add_items) df <- df |> select(!contains("item"))
   
-  if (return_data) return(df)
+  if (print_plot) print(p)
+  if (return_plot) return(p)
+  if (return_data & !return_plot) return(df)
 }
 
 
@@ -201,12 +226,18 @@ simulate_vviq <- function(
 simulate_osivq <- function(
    n_subjects = 500,
    o_skew = -0.392, # Skewness for the object scale
-   print_cor = FALSE,
-   plot = TRUE,
-   vars_to_plot = "score",
    add_items = FALSE,
-   return_data = TRUE
+   return_data = TRUE,
+   print_plot  = FALSE,
+   return_plot = FALSE,
+   var_to_plot = "score",
+   verbose = FALSE # whether to print the correlations
 ){
+  
+  if ((print_plot | return_plot) & !(var_to_plot %in% c("score", "mean"))){
+    stop('var_to_plot must be either "score" or "mean".')
+  }
+  
   scale_means <- c(3.63, 2.83, 3.00)
   scale_sds <- c(0.62, 0.66, 0.68)
   
@@ -236,7 +267,7 @@ simulate_osivq <- function(
   colnames(df) <- paste0("mean_", c("object", "spatial", "verbal"))
   df <- as_tibble(df)
   
-  if (print_cor) {
+  if (verbose) {
     cat(
       "Correlations  expected: O/S = -0.03 ; O/V = 0.12 ; S/V = -0.18\nCorrelations simulated: O/S =", round(cor(df$mean_object, df$mean_spatial), 2),
       "; O/V =", round(cor(df$mean_object, df$mean_verbal), 2),
@@ -247,15 +278,20 @@ simulate_osivq <- function(
   df <- 
     df |>
     mutate(
-      score_object = rescale(mean_object, c(15, 75)) |> round(),
-      score_spatial = rescale(mean_spatial, c(15, 75)) |> round(),
-      score_verbal = rescale(mean_verbal, c(15, 75)) |> round()
+      # score_object = rescale(mean_object, c(15, 75)) |> round(),
+      # score_spatial = rescale(mean_spatial, c(15, 75)) |> round(),
+      # score_verbal = rescale(mean_verbal, c(15, 75)) |> round()
+      score_object = floor(mean_object * 15),
+      score_spatial = floor(mean_spatial * 15),
+      score_verbal = floor(mean_verbal * 15),
+      across(contains("score"), ~case_when(. < 15 ~ 15, . > 75 ~ 75, TRUE ~ .))
     )
   
-  if (plot) {
+  # We can create a plot with the desired variables
+  if (print_plot | return_plot){ 
     p <- 
       df |> 
-      select(contains(vars_to_plot)) |>
+      select(contains(var_to_plot)) |>
       pivot_longer(cols = everything()) |> 
       ggplot(aes(x = value, colour = name, fill = name)) + 
       geom_density(alpha = 0.1, linewidth = 0.5) +
@@ -265,8 +301,8 @@ simulate_osivq <- function(
         breaks = breaks_pretty(20)
       ) +
       labs(
-        title = "Simulated OSIVQ distribution",
-        x = "OSIVQ total score per-scale",
+        title = paste0("Simulated OSIVQ distribution (N = ", n_subjects, ")"),
+        x = paste0("OSIVQ ", var_to_plot, " per-scale"),
         y = "Density"
       ) +
       theme_modern() +
@@ -276,8 +312,6 @@ simulate_osivq <- function(
         axis.text.x = element_text(size = 10),
         axis.ticks.x = element_line(),
       )
-    
-    print(p)
   }
   
   # We can use the total scores to add the individual items if necessary
@@ -294,6 +328,8 @@ simulate_osivq <- function(
       rename_with(~paste0("osivq_", .), starts_with("item"))
   }
   
-  if (return_data) return(df)
+  if (print_plot) print(p)
+  if (return_plot) return(p)
+  if (return_data & !return_plot) return(df)
 }
 

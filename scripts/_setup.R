@@ -29,6 +29,7 @@ pacman::p_load(
   # ----- Simulation
   sn,         # simulate skew normal distributions
   scales,     # for rescaling
+  patchwork,  # for arranging plots
   # Should remain last to avoid conflicts with other packages
   tidyverse   # modern R ecosystem
 )

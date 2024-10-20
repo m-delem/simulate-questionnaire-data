@@ -1,7 +1,6 @@
 project:
   type: default
   execute-dir: project # the working directory for computations
-  output-dir: _outputs
   
 author: 
   - name: Maël Delem
