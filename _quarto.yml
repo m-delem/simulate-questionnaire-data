@@ -1,0 +1,93 @@
+project:
+  type: default
+  execute-dir: project # the working directory for computations
+  output-dir: _outputs
+  
+author: 
+  - name: Maël Delem
+    orcid: 0009-0005-8518-1991
+    email: mael.delem@univ-lyon2.fr
+    corresponding: true
+    url: https://emc.univ-lyon2.fr/equipes/memoire-emotion-et-attention-mea/delem-mael
+    affiliations:
+    - id: emc
+      name: Study of Cognitive Mechanisms (EMC) Laboratory, Université Lumière Lyon 2
+      city: Lyon
+      country: France
+      url: https://emc.univ-lyon2.fr
+
+# --- Common options ---
+date-modified: last-modified
+
+bibliography:
+  - "bibliography/references.bib" 
+  - "bibliography/packages.bib"
+csl: "bibliography/apa.csl"
+
+execute:
+  freeze: false
+  warning: false
+  error: false
+  message: false
+
+toc: true
+number-sections: true
+crossref:
+  chapters: true
+
+# --- Format-specific options ---
+format:
+
+  html:
+    embed-resources: true  # self-contained HTML rendering
+    format-links: false    # no links to other formats
+
+    # styling
+    theme: 
+      dark: darkly
+      light: flatly
+    css: "utils/html/custom.css"
+    # importing Montserrat font
+    header-includes: |
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    mainfont: Montserrat
+    fontsize: "medium"
+    
+    # interactive features
+    lightbox: true          # clickable figures
+    code-fold: true         # code folding for clarity
+    code-tools: true        # hide or show all code
+    code-annotations: hover # show code annotations on hover
+    
+    # HTML-specific TOC options
+    toc-location: right
+    toc-depth: 2
+    toc-expand: 1
+    number-depth: 2
+
+  # Word
+  # docx: 
+  #   reference-doc: "utils/docx/custom-reference-doc.docx"
+  #   toc: false
+  #   echo: false
+  #   # extension to add a block with authors in .docx format
+  #   filters:
+  #     - authors-block
+
+  # PDF - see https://github.com/quarto-journals/elsevier
+  # elsevier-pdf:
+  #   toc: false
+  #   echo: false
+  #   journal:
+  #     cite-style: authoryear    
+  #   # the option to include a new page after the abstract is commented out
+  #   # the second one is to include a new page after the table of contents
+  #   include-in-header:
+  #     text: |
+  #       % \newpageafter{abstract}
+  #       \let\tableofcontentsORIG\tableofcontents
+  #       \renewcommand\tableofcontents{\tableofcontentsORIG\clearpage}
+
+

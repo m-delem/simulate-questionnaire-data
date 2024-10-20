@@ -1,0 +1,19 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+# Ignore all the junk created by LaTeX
+*.aux
+*.out
+*.bbl
+*.ent
+*.log
+*.spl
+*.bst
+*.cls
+# quarto
+/.quarto/
+_products
+_freeze
+# ignore anything in the data directory if need be (e.g. for privacy)
+# data/*

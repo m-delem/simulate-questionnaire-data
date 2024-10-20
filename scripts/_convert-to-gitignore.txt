@@ -1,0 +1,23 @@
+# this is a "backup" of the files to ignore because the .gitignore is not 
+# cloned with the template. Add this to the .gitignore file in the root of the
+# project to ignore the files listed here for version control, 
+# then delete this .txt file.
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+# Ignore all the junk created by LaTeX
+*.aux
+*.out
+*.bbl
+*.ent
+*.log
+*.spl
+*.bst
+*.cls
+# quarto
+/.quarto/
+_products
+_freeze
+# ignore anything in the data directory if need be (e.g. for privacy)
+# data/*
