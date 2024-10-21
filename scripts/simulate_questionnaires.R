@@ -11,11 +11,11 @@ simulate_items <- function(
     max_item = 5,
     verbose = FALSE # whether to print the item scores
 ){
-  if (score < n_items * min_item_score) {
+  if (score < n_items * min_item) {
     stop("The total score is too low to be distributed among the items")
   }
   
-  if (score > n_items * max_item_score) {
+  if (score > n_items * max_item) {
     stop("The total score is too high to be distributed among the items")
   }
   
@@ -30,11 +30,11 @@ simulate_items <- function(
   for (point_missing in seq_along(1:score)) {
     
     # If some items are below the minimum (e.g., 0), we fill them first
-    if (any(all_items < min_item_score)) {
-      item <- resample(which(all_items < min_item_score), 1)
+    if (any(all_items < min_item)) {
+      item <- resample(which(all_items < min_item), 1)
       all_items[item] |> increment(1)
     } else {
-      item <- resample(which(all_items < max_item_score), 1)
+      item <- resample(which(all_items < max_item), 1)
       all_items[item] |> increment(1)
     }
   }
