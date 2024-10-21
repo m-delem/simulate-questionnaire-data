@@ -13,6 +13,18 @@ complex settings such as multivariate analyses or multilevel modelling,
 simulation can be a powerful tool to do these tasks by allowing to test
 intricate computations on synthetic data.
 
+> I found out (*after the deed, of course*) that several packages
+> already existed that could have eased my work. The closest to what I
+> coded here is the
+> [`LikertMakeR`](https://github.com/WinzarH/LikertMakeR) package, which
+> is really comprehensive. Also check out
+> [`latent2likert`](https://github.com/markolalovic/latent2likert) for a
+> more item-based simulation approach. Still, I feel like I came up with
+> pretty straightforward solutions to my problems so I decided to share
+> them. *Note: this is not a package, simply because I haven’t had the
+> time to learn how to make one. I’m just sharing some scripts that I
+> believe could be useful.*
+
 This repository contains code to simulate data from two mental imagery
 questionnaires I used often: the [Vividness of Visual Imagery
 Questionnaire
@@ -21,19 +33,13 @@ and the [Object-Spatial Imagery and Verbal
 Questionnaire](https://onlinelibrary.wiley.com/doi/10.1002/acp.1473).
 The simulation script (`scripts/simulate_questionnaires.R`) is heavily
 commented to explain the rationale behind the code and the choices made.
-The script is also designed to be easily adaptable to other
-questionnaires. It shows methods to:
+The script is also designed to be adaptable to other questionnaires.
 
-- Simulate score distributions from various types of information (e.g.,
-  quantile percentages, means, sd, skewness).
-
-- Simulate different distributions for sub-scales or sub-groups in the
-  sample.
-
-- Correlate sub-scales with different types of distributions.
-
-- Simulate individual ordinal items from the total scores of each
-  subject.
+<!-- It shows methods to: -->
+<!-- -   Simulate score distributions from various types of information (e.g., quantile percentages, means, sd, skewness). -->
+<!-- -   Simulate different distributions for sub-scales or sub-groups in the sample. -->
+<!-- -   Correlate sub-scales with different types of distributions. -->
+<!-- -   Simulate individual ordinal items from the total scores of each subject. -->
 
 `scripts/plot_questionnaires.R` contains two functions associated with
 the questionnaires to provide convenient plotting methods.
