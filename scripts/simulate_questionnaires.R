@@ -2,19 +2,21 @@ source("scripts/_setup.R")
 
 # Simulating individual questionnaire items' scores --------------------
 
-# I created a function that generates item scores that sum up to a total score.
-# The function is set with VVIQ values by default, but it could be used for 
-# any other scale by tweaking the number of items, min and max scores.
+# Function that generates item scores that sum up to a total score.
 
 simulate_items <- function(
     score = 20,
     n_items = 16,
-    min_item_score = 1,
-    max_item_score = 5,
+    min_item = 1,
+    max_item = 5,
     verbose = FALSE # whether to print the item scores
 ){
   if (score < n_items * min_item_score) {
     stop("The total score is too low to be distributed among the items")
+  }
+  
+  if (score > n_items * max_item_score) {
+    stop("The total score is too high to be distributed among the items")
   }
   
   # Function to mimic the += operator in Python
@@ -42,6 +44,133 @@ simulate_items <- function(
   }
   
   return(all_items)
+}
+
+
+# Simulate any questionnaire with given parameters ------------------------
+
+# simulate_questionnaire <- function(
+    #     n_subjects = 500,
+#     name = "scale_1",
+#     distrib = "skew_normal",
+#     mean = 32,
+#     sd = 7,
+#     skew = NULL,
+#     n_items = 15,
+#     min_item = 1,
+#     max_item = 5
+#   )
+
+simulate_questionnaires <- function(
+    n_subjects = 500,
+    names = c("subscale_1", "subscale_2"),
+    distrib = c("normal", "skew_normal"),
+    method = "score_means", # "score_means" or "item_means"
+    means = c(32, 45),
+    sds = c(5, 7),
+    skews = c(0, 0),
+    corrs = NULL,
+    n_items = c(15, 15),
+    min_item = c(1, 1),
+    max_item = c(5, 5),
+    add_items = TRUE
+) {
+  if (length(names) != length(distrib)) {
+    stop("The number of names must match the number of distributions")
+  }
+  
+  if (length(names) != length(means)) {
+    stop("The number of names must match the number of means")
+  }
+  
+  if (length(names) != length(sds)) {
+    stop("The number of names must match the number of standard deviations")
+  }
+  
+  if (!is.null(skews) && length(names) != length(skews)) {
+    stop("The number of names must match the number of skewness values")
+  }
+  
+  if (!is.null(cor_mat) && nrow(cor_mat) != ncol(cor_mat)) {
+    stop("The correlation matrix must be square")
+  }
+  
+  if (!is.null(cor_mat) && nrow(cor_mat) != length(names)) {
+    stop("The correlation matrix must have the same number of rows as the number of sub-scales")
+  }
+  
+  if (!is.null(cor_mat) && any(diag(cor_mat) != 1)) {
+    stop("The diagonal of the correlation matrix must be 1")
+  }
+  
+  if (!is.null(cor_mat) && any(cor_mat != t(cor_mat))) {
+    stop("The correlation matrix must be symmetric")
+  }
+  
+  if (any(distrib == "skew_normal") && is.null(skews)) {
+    stop("You must provide skewness values for skew-normal distributions")
+  }
+  
+  if (any(distrib == "skew_normal") && any(skews < -1) || any(skews > 1)){
+    stop("Skewness values must be between -1 and 1 for skew-normal distributions")
+  }
+  
+  cat("That works!\n")
+  
+  # # Function to make sampling programatically easier
+  # resample <- function(x, n) x[sample.int(length(x), n)]
+  # 
+  # df <- tibble(subject = 1:n_subjects)
+  # 
+  # for (i in seq_along(names)) {
+  #   if (distrib[i] == "normal") {
+  #     df <- 
+  #       df |> 
+  #       mutate(
+  #         !!paste0("mean_", names[i]) := rnorm(n_subjects, mean = means[i], sd = sds[i])
+  #       )
+  #   } else {
+  #     params <- cp2dp(c(means[i], sds[i], skews[i]), "SN")
+  #     df <- 
+  #       df |> 
+  #       mutate(
+  #         !!paste0("mean_", names[i]) := rsn(n_subjects, dp = params, "SN")
+  #       )
+  #   }
+  # }
+  # 
+  # if (!is.null(cor_mat)) {
+  #   df <- 
+  #     df |> 
+  #     mutate(
+  #       across(starts_with("mean_"), ~. - mean(.)) |> 
+  #       as.matrix() |> 
+  #       `*`(chol(cor_mat)) |> 
+  #       as_tibble() |> 
+  #       rename_with(~paste0("mean_", .), starts_with("mean_"))
+  # }
+  # 
+  # df <- 
+  #   df |> 
+  #   mutate(
+  #     across(starts_with("mean_"), ~round(.)),
+  #     across(starts_with("mean_"), ~case_when(. < 0 ~ 0, . > 100 ~ 100, TRUE ~ .))
+  #   )
+  # 
+  # if (add_items) {
+  #   for (i in seq_along(names)) {
+  #     df <- 
+  #       df |> 
+  #       rowwise() |> 
+  #       mutate(
+  #         !!paste0("item_", names[i]) := list(simulate_items(get(paste0("mean_", names[i])), 15, 1, 5))
+  #       ) |> 
+  #       unnest_wider(get(paste0("item_", names[i])), names_sep = "_") |> 
+  #       rename_with(~paste0(names[i], "_"), starts_with("item"))
+  #   }
+  # }
+  # 
+  # return(df)
 }
 
 
@@ -230,4 +359,3 @@ simulate_osivq <- function(
   
   return(df)
 }
-
