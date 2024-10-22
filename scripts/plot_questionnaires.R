@@ -1,6 +1,70 @@
 source("scripts/simulate_questionnaires.R")
 
 
+# Plotting questionnaire distributions ------------------------------------
+
+plot_questionnaires <- function(
+    df, 
+    var = "score", 
+    questionnaire = "questionnaire", 
+    print = FALSE
+) {
+  
+  if (!(var %in% c("score", "mean"))){
+    stop('var must be either "score" or "mean".')
+  }
+  
+  n_subjects <- nrow(df)
+  
+  if (var == "score") {
+    div_breaks <- 1
+  } else {
+    div_breaks <- 2
+  }
+  
+  p <- 
+    df |> 
+    select(contains(var)) |>
+    pivot_longer(cols = everything()) |> 
+    mutate(
+      scale = 
+        str_remove(name, paste0(var, "_")) |> 
+        str_replace_all("_", " ") |> 
+        str_to_title()
+    ) |> 
+    ggplot(aes(
+      x = value, 
+      colour = scale,
+      fill = scale
+    )
+    ) +
+    geom_density(aes(y = after_stat(count)), alpha = 0.1, linewidth = 0.5) +
+    scale_y_continuous(expand = expansion(c(0,0.1))) +
+    scale_x_continuous(
+      expand = expansion(c(0,0)),
+      breaks = breaks_pretty(20 / div_breaks)
+    ) +
+    labs(
+      title = paste0("Simulated ", questionnaire, " ", var, " distribution (N = ", n_subjects, ")"),
+      colour = "Scale",
+      fill = "Scale",
+      x = paste0(questionnaire, " ", var, "s"),
+      y = "Count"
+    ) +
+    theme_modern() +
+    theme(
+      panel.grid.major.y = element_line(colour = "grey90"),
+      panel.grid.minor.y = element_line(colour = "grey90"),
+      axis.text.x = element_text(size = 10),
+      axis.ticks.x = element_line(),
+    )
+  
+  if (print) print(p)
+  
+  return(p)
+}
+
+
 # Plotting VVIQ distributions ---------------------------------------------
 
 plot_vviq <- function(df, var = "score", print = FALSE) {
@@ -63,61 +127,6 @@ plot_vviq <- function(df, var = "score", print = FALSE) {
       panel.grid.minor.y = element_line(colour = "grey90"),
       axis.text.x = element_text(size = 10),
       axis.ticks.x = element_line(),
-    )
-  
-  if (print) print(p)
-  
-  return(p)
-}
-
-
-# Plotting OSIVQ distributions ---------------------------------------------
-
-plot_osivq <- function(df, var = "score", print = FALSE) {
-  
-  if (!(var %in% c("score", "mean"))){
-    stop('var must be either "score" or "mean".')
-  }
-  
-  n_subjects <- nrow(df)
-  
-  if (var == "score") {
-    div_breaks <- 1
-  } else {
-    div_breaks <- 2
-  }
-  
-  p <- 
-    df |> 
-    select(contains(var)) |>
-    pivot_longer(cols = everything()) |> 
-    mutate(
-      name = case_when(
-        str_detect(name, "object") ~ "Object",
-        str_detect(name, "spatial") ~ "Spatial",
-        str_detect(name, "verbal") ~ "Verbal"
-      )
-    ) |> 
-    ggplot(aes(x = value, colour = name, fill = name)) + 
-    geom_density(aes(y = after_stat(count)), alpha = 0.1, linewidth = 0.5) +
-    scale_y_continuous(expand = expansion(c(0,0.1))) +
-    scale_x_continuous(
-      expand = expansion(c(0,0)),
-      breaks = breaks_pretty(20 / div_breaks)
-    ) +
-    labs(
-      title = paste0("Simulated OSIVQ distribution (N = ", n_subjects, ")"),
-      x = paste0("OSIVQ ", var, " per-scale"),
-      y = "Count",
-      color = "Scale",
-      fill = "Scale"
-    ) +
-    theme_modern() +
-    theme(
-      panel.grid.major.y = element_line(colour = "grey90"),
-      panel.grid.minor.y = element_line(colour = "grey90"),
-      axis.text.x = element_text(size = 10),
-      axis.ticks.x = element_line()
     )
   
   if (print) print(p)

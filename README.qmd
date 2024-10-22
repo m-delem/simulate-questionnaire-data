@@ -8,7 +8,7 @@ format: gfm
 
 I have been working on multiple projects that involved analysing questionnaires with "Likert scales", i.e. ordinal variables or pseudo-continuous variables obtained by summing all the ordinal items. Before engaging into the experiments proper, we should conduct robust power analyses, code testing, sanity checks, etc. to ensure that the data collection and analysis will be as smooth as possible. In several complex settings such as multivariate analyses or multilevel modelling, simulation can be a powerful tool to do these tasks by allowing to test intricate computations on synthetic data.
 
-> I found out (*after the deed, of course*) that several packages already existed that could have eased my work. The closest to what I coded here is the [`LikertMakeR`](https://github.com/WinzarH/LikertMakeR) package, which is really comprehensive. Also check out [`latent2likert`](https://github.com/markolalovic/latent2likert) for a more item-based simulation approach. Still, I feel like I came up with pretty straightforward solutions to my problems so I decided to share them. *Note: this is not a package, simply because I haven't had the time to learn how to make one. I'm just sharing some scripts that I believe could be useful.*
+> I found out (*after the deed, of course*) that several packages already existed that could have eased my work. The closest to what I coded here is the [`LikertMakeR`](https://github.com/WinzarH/LikertMakeR) package, which is really comprehensive. Also check out [`latent2likert`](https://github.com/markolalovic/latent2likert) for a more item-based simulation approach. Note: this is not a standalone package because I don't think the functions add a signficant improvement over those from the packages above, but I like the straightforward solutions I came up with, which is why I document them here. *(I still added them to [my (secret 👀) personal package](https://github.com/m-delem/delemr/) though, to access them quickly without copy-pasting.)*
 
 ```{r}
 #| label: setup
@@ -54,23 +54,38 @@ df <-
 df |> head() |> display()
 ```
 
-```{r}
-# I'd like to create a function that could take these arguments and simulate everything
-df <- simulate_questionnaire(
-  n_subjects = 1000,
-  names = c("subscale_1", "subscale_2"),
-  distrib = c("normal", "skew_normal"),
-  means = c(32, 45),
-  sds = c(5, 7),
-  skews = NULL,
-  cor_mat = NULL,
-  add_items = TRUE
-)
+On this basis, I created the `simulate_questionnaires` function to simulate the scores of a questionnaire for a given number of subjects. The function can simulate multiple scales in parallel with normal or skew-normal distributions, which can be correlated. Conceptually, this could be a simulation of multiple correlated questionnaires (Q1 with several items on a construct correlated with Q2 on another construct) or a questionnaire with correlated sub-scales... Or both at the same time, just name your scales however you want.
 
-# if skews is NULL the vector should be 0 times the length of the names vector
-# if cor_mat is NULL the function should not correlate the sub-scales
+```{r}
+#| label: simulate-questionnaires
+
+# Let's see if we can simulate the OSIVQ
+df_osivq <- 
+  simulate_questionnaires(
+    n_subjects = 1000,
+    names = c("osivq_o", "osivq_s", "osivq_v"),  
+    distrib = c("skew_normal", "normal", "normal"), 
+    method = "item_means",
+    means = c(3.63, 2.83, 3),   
+    sds = c(0.62, 0.66, 0.68),       
+    skews = c(-0.392, 0, 0),
+    corrs = c(-0.03, 0.12, -0.18),
+    n_items = c(15, 15, 15),
+    min_item = c(1, 1, 1),
+    max_item = c(5, 5, 5),
+    add_items = FALSE,
+    print_corrs = TRUE
+    )
 ```
 
+```{r}
+#| label: plot-questionnaires
+#| fig-width: 8
+#| fig-height: 6
+
+plot_questionnaires(osivq, var = "score", questionnaire = "OSIVQ", print = TRUE)
+plot_questionnaires(osivq, var = "mean", questionnaire = "OSIVQ", print = TRUE)
+```
 
 <!-- It shows methods to: -->
 

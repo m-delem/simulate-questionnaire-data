@@ -19,18 +19,20 @@ intricate computations on synthetic data.
 > [`LikertMakeR`](https://github.com/WinzarH/LikertMakeR) package, which
 > is really comprehensive. Also check out
 > [`latent2likert`](https://github.com/markolalovic/latent2likert) for a
-> more item-based simulation approach. Still, I feel like I came up with
-> pretty straightforward solutions to my problems so I decided to share
-> them. *Note: this is not a package, simply because I haven’t had the
-> time to learn how to make one. I’m just sharing some scripts that I
-> believe could be useful.*
+> more item-based simulation approach. Note: this is not a standalone
+> package because I don’t think the functions add a signficant
+> improvement over those from the packages above, but I like the
+> straightforward solutions I came up with, which is why I document them
+> here. *(I still added them to [my (secret 👀) personal
+> package](https://github.com/m-delem/delemr/) though, to access them
+> quickly without copy-pasting)*
 
 ``` r
 source("scripts/simulate_questionnaires.R")
 source("scripts/plot_questionnaires.R")
 ```
 
-## Score-based approach
+## Simulate items for a given score
 
 My initial problem was to find a way to simulate a fixed number of
 bounded ordinal variables (questionnaire items) that sum to a given
@@ -45,17 +47,19 @@ simulated items.
 
 ``` r
 # Subject with a score of 32 on a 12-item questionnaire ranging from 1 to 5
-simulate_items(score = 32, n_items = 12, min = 1, max = 5)
+simulate_items(score = 32, n_items = 12, min_item = 1, max_item = 5)
 ```
 
      [1] 1 4 2 2 3 2 3 3 2 1 4 5
 
 ``` r
-# Subject with a score of 45 on a 8-item questionnaire ranging from 1 to 7
-simulate_items(score = 45, n_items = 8, min = 1, max = 7)
+# Subject with a score of 35 on a 8-item questionnaire ranging from 1 to 7
+simulate_items(35, 8, 1, 7, verbose = TRUE)
 ```
 
-    [1] 7 7 2 4 6 6 7 6
+    Item scores are  7 7 2 2 4 4 5 4  with a total score of  35 
+
+    [1] 7 7 2 2 4 4 5 4
 
 It can be mapped on a distribution to simulate the items for a whole
 sample of subjects.
@@ -76,14 +80,22 @@ df <-
 df |> head() |> display()
 ```
 
-| subject | score | item_1 | item_2 | item_3 | item_4 | item_5 | item_6 | item_7 | item_8 | item_9 | item_10 | item_11 | item_12 |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 35 | 1 | 2 | 5 | 3 | 5 | 2 | 2 | 3 | 2 | 5 | 2 | 3 |
-| 2 | 40 | 4 | 2 | 5 | 2 | 3 | 4 | 3 | 2 | 4 | 4 | 3 | 4 |
-| 3 | 28 | 1 | 2 | 2 | 3 | 2 | 1 | 2 | 2 | 4 | 3 | 2 | 4 |
-| 4 | 31 | 1 | 3 | 4 | 2 | 3 | 2 | 3 | 5 | 1 | 3 | 3 | 1 |
-| 5 | 32 | 2 | 2 | 2 | 3 | 3 | 2 | 1 | 4 | 5 | 4 | 2 | 2 |
-| 6 | 33 | 5 | 4 | 2 | 2 | 3 | 2 | 2 | 3 | 4 | 1 | 2 | 3 |
+``` r
+# I'd like to create a function that could take these arguments and simulate everything
+df <- simulate_questionnaire(
+  n_subjects = 1000,
+  names = c("subscale_1", "subscale_2"),
+  distrib = c("normal", "skew_normal"),
+  means = c(32, 45),
+  sds = c(5, 7),
+  skews = NULL,
+  cor_mat = NULL,
+  add_items = TRUE
+)
+
+# if skews is NULL the vector should be 0 times the length of the names vector
+# if cor_mat is NULL the function should not correlate the sub-scales
+```
 
 <!-- It shows methods to: -->
 <!-- -   Simulate score distributions from various types of information (e.g., quantile percentages, means, sd, skewness). -->
@@ -108,8 +120,8 @@ and the [Object-Spatial Imagery and Verbal
 Questionnaire](https://onlinelibrary.wiley.com/doi/10.1002/acp.1473).
 
 `simulate_vviq` creates a data frame with a given number of subjects,
-simulating VVIQ scores and means for four groups defined in aphantasia
-literature (aphantasia, hypophantasia, typical imagery and
+simulating VVIQ scores and mean scores for four groups defined in
+aphantasia literature (aphantasia, hypophantasia, typical imagery and
 hyperphantasia, see [Wright et al.,
 2024](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1454107/full)).
 It can optionally simulate individual responses for all of the 16 items
@@ -127,10 +139,10 @@ df_vviq |>
 
 | subject | group | score_vviq | mean_vviq | vviq_item_1 | vviq_item_2 | vviq_item_3 | vviq_item_4 | vviq_item_5 | vviq_item_6 | vviq_item_7 | vviq_item_8 | vviq_item_9 | vviq_item_10 | vviq_item_11 | vviq_item_12 | vviq_item_13 | vviq_item_14 | vviq_item_15 | vviq_item_16 |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 130 | aph | 16 | 1.00 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
-| 9 | hypo | 24 | 1.50 | 1 | 1 | 1 | 1 | 1 | 4 | 1 | 1 | 2 | 3 | 2 | 1 | 1 | 2 | 1 | 1 |
-| 1 | typical | 56 | 3.50 | 2 | 3 | 2 | 3 | 3 | 3 | 4 | 4 | 5 | 1 | 5 | 5 | 3 | 4 | 4 | 5 |
-| 5 | hyper | 78 | 4.88 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 5 | 5 | 5 | 4 | 5 |
+| 18 | aph | 16 | 1.00 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| 24 | hypo | 29 | 1.81 | 1 | 1 | 1 | 1 | 1 | 2 | 4 | 1 | 4 | 2 | 1 | 2 | 3 | 2 | 1 | 2 |
+| 1 | typical | 52 | 3.25 | 2 | 3 | 5 | 5 | 4 | 4 | 1 | 4 | 3 | 5 | 4 | 3 | 1 | 4 | 1 | 3 |
+| 17 | hyper | 77 | 4.81 | 5 | 4 | 5 | 4 | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
 
 `simulate_osivq` does the same for the OSIVQ, which comprises three
 sub-scales: Object, Spatial and Verbal. There are no conventional
@@ -146,12 +158,12 @@ df_osivq |>
 
 | mean_object | mean_spatial | mean_verbal | score_object | score_spatial | score_verbal | osivq_item_o_1 | osivq_item_o_2 | osivq_item_o_3 | osivq_item_o_4 | osivq_item_o_5 | osivq_item_o_6 | osivq_item_o_7 | osivq_item_o_8 | osivq_item_o_9 | osivq_item_o_10 | osivq_item_o_11 | osivq_item_o_12 | osivq_item_o_13 | osivq_item_o_14 | osivq_item_o_15 | osivq_item_s_1 | osivq_item_s_2 | osivq_item_s_3 | osivq_item_s_4 | osivq_item_s_5 | osivq_item_s_6 | osivq_item_s_7 | osivq_item_s_8 | osivq_item_s_9 | osivq_item_s_10 | osivq_item_s_11 | osivq_item_s_12 | osivq_item_s_13 | osivq_item_s_14 | osivq_item_s_15 | osivq_item_v_1 | osivq_item_v_2 | osivq_item_v_3 | osivq_item_v_4 | osivq_item_v_5 | osivq_item_v_6 | osivq_item_v_7 | osivq_item_v_8 | osivq_item_v_9 | osivq_item_v_10 | osivq_item_v_11 | osivq_item_v_12 | osivq_item_v_13 | osivq_item_v_14 | osivq_item_v_15 |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3.50 | 3.15 | 2.00 | 52 | 47 | 30 | 4 | 4 | 4 | 5 | 5 | 5 | 2 | 5 | 2 | 4 | 2 | 3 | 2 | 1 | 4 | 5 | 1 | 3 | 3 | 2 | 3 | 5 | 1 | 4 | 4 | 4 | 5 | 2 | 3 | 2 | 2 | 2 | 2 | 4 | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 1 | 4 | 1 |
-| 2.56 | 2.40 | 2.87 | 38 | 35 | 43 | 4 | 4 | 2 | 2 | 3 | 2 | 2 | 2 | 3 | 3 | 1 | 1 | 1 | 3 | 5 | 1 | 4 | 2 | 3 | 5 | 1 | 3 | 1 | 1 | 2 | 2 | 4 | 1 | 2 | 3 | 3 | 1 | 1 | 1 | 4 | 5 | 5 | 2 | 5 | 2 | 5 | 2 | 2 | 3 | 2 |
-| 3.59 | 1.90 | 2.93 | 53 | 28 | 43 | 5 | 2 | 4 | 2 | 4 | 3 | 5 | 2 | 3 | 2 | 5 | 4 | 4 | 3 | 5 | 1 | 3 | 1 | 1 | 2 | 1 | 3 | 1 | 3 | 2 | 1 | 2 | 2 | 3 | 2 | 2 | 3 | 3 | 3 | 5 | 3 | 2 | 3 | 5 | 3 | 4 | 2 | 1 | 3 | 1 |
-| 2.90 | 4.38 | 2.64 | 43 | 65 | 39 | 3 | 4 | 4 | 3 | 3 | 4 | 1 | 3 | 4 | 1 | 4 | 3 | 2 | 1 | 3 | 5 | 5 | 5 | 5 | 5 | 4 | 5 | 3 | 4 | 3 | 5 | 5 | 2 | 5 | 4 | 3 | 3 | 4 | 1 | 2 | 4 | 1 | 2 | 4 | 1 | 5 | 3 | 2 | 2 | 2 |
-| 3.37 | 2.34 | 3.13 | 50 | 35 | 46 | 2 | 5 | 2 | 4 | 4 | 4 | 2 | 2 | 3 | 3 | 5 | 2 | 5 | 2 | 5 | 3 | 1 | 1 | 2 | 3 | 3 | 1 | 2 | 4 | 4 | 4 | 3 | 2 | 1 | 1 | 2 | 4 | 3 | 3 | 3 | 5 | 2 | 3 | 3 | 3 | 1 | 3 | 3 | 3 | 5 |
-| 3.67 | 2.05 | 3.23 | 54 | 30 | 48 | 2 | 5 | 4 | 4 | 3 | 3 | 4 | 1 | 5 | 3 | 4 | 5 | 4 | 4 | 3 | 1 | 3 | 4 | 2 | 3 | 2 | 4 | 1 | 1 | 2 | 1 | 1 | 2 | 2 | 1 | 2 | 1 | 3 | 5 | 5 | 4 | 4 | 3 | 2 | 2 | 5 | 3 | 3 | 4 | 2 |
+| 3.55 | 2.68 | 3.41 | 53 | 40 | 51 | 5 | 4 | 3 | 3 | 3 | 5 | 3 | 4 | 1 | 2 | 4 | 5 | 1 | 5 | 5 | 2 | 3 | 2 | 1 | 5 | 1 | 5 | 3 | 2 | 2 | 2 | 2 | 2 | 3 | 5 | 4 | 5 | 3 | 5 | 3 | 1 | 4 | 5 | 2 | 5 | 3 | 1 | 3 | 5 | 2 |
+| 3.55 | 2.35 | 0.93 | 53 | 35 | 15 | 5 | 5 | 5 | 4 | 4 | 5 | 4 | 1 | 5 | 2 | 3 | 4 | 4 | 1 | 1 | 1 | 3 | 2 | 1 | 5 | 2 | 2 | 2 | 3 | 1 | 4 | 3 | 2 | 1 | 3 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| 3.83 | 1.45 | 2.98 | 57 | 21 | 44 | 5 | 5 | 2 | 1 | 4 | 5 | 4 | 1 | 5 | 2 | 5 | 5 | 5 | 3 | 5 | 2 | 1 | 1 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 2 | 2 | 1 | 3 | 2 | 3 | 3 | 2 | 4 | 4 | 2 | 4 | 2 | 2 | 3 | 2 | 5 | 5 | 1 |
+| 5.26 | 3.92 | 4.11 | 75 | 58 | 61 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 3 | 5 | 5 | 4 | 4 | 4 | 5 | 3 | 2 | 3 | 5 | 5 | 1 | 4 | 2 | 4 | 5 | 3 | 5 | 5 | 4 | 5 | 4 | 5 | 3 | 3 | 5 | 3 | 5 |
+| 4.22 | 3.09 | 1.43 | 63 | 46 | 21 | 5 | 5 | 3 | 3 | 3 | 5 | 5 | 5 | 5 | 3 | 3 | 5 | 5 | 3 | 5 | 4 | 4 | 3 | 2 | 2 | 1 | 2 | 5 | 1 | 3 | 3 | 5 | 5 | 2 | 4 | 2 | 3 | 1 | 1 | 1 | 1 | 2 | 2 | 1 | 1 | 2 | 1 | 1 | 1 | 1 |
+| 3.11 | 2.30 | 2.64 | 46 | 34 | 39 | 2 | 2 | 2 | 5 | 1 | 2 | 2 | 3 | 5 | 3 | 3 | 4 | 3 | 5 | 4 | 2 | 3 | 1 | 1 | 4 | 1 | 2 | 3 | 2 | 1 | 4 | 3 | 3 | 2 | 2 | 4 | 5 | 1 | 3 | 1 | 3 | 1 | 3 | 2 | 4 | 2 | 2 | 3 | 2 | 3 |
 
 Two plotting functions, `plot_vviq` and `plot_osivq`, are provided to
 plot the distributions of the scores and means of the VVIQ and OSIVQ,
@@ -188,5 +200,5 @@ be useful to you! :cherry_blossom:
 > a quick tutorial to use this project structure and an in-depth
 > explanation of its elements in the README of the template.
 
-[^1]: The function is close in purpose to the `makeItemsScale` from the
-    `LikertMakeR` package.
+[^1]: The function is close in its purpose to the `makeItemsScale` from
+    the `LikertMakeR` package.
