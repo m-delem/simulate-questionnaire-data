@@ -149,8 +149,6 @@ simulate_questionnaires <- function(
     mutate(subject = 1:n_subjects) |> 
     select(subject, everything())
   
-  cat("Everything works!\n\n")
-  
   # Print the expected and simulated correlations
   if (print_corrs) {
     cat("Expected correlations:\n")
@@ -333,30 +331,3 @@ simulate_vviq <- function(
   
   return(df)
 }
-
-
-# Simulating OSIVQ data ---------------------------------------------------
-
-# I could find way more material for the OSIVQ than the VVIQ, using the original 
-# article from Blazhenkova and Kozhevnikov (2009).
-# 
-# The OSIVQ has 45 items divided into three scales with 15 items each:
-# - Object scale (OSIVQ-O), M = 3.63, SD = 0.62
-# - Spatial scale (OSIVQ-S), M = 2.83, SD = 0.66
-# - Verbal scale (OSIVQ-V), M = 3.00, SD = 0.68
-# 
-# B & K also precise that the OSIVQ-O is negatively skewed with Skewness = -.392
-# and SE = .098, which is a benediction. I found the way to simulate this with a
-# skew-normal distribution using the "sn" package.
-# 
-# B & K report that O and S have a correlation of -0.03, O and V 0.12, and S and
-# V -0.18. I found in my good old Msc simulation code the way to correlate the 
-# three scales using an effect matrix. I knew it would come in handy one day!
-# 
-# We can now proceed the same way we did with the VVIQ:
-# - Simulate distributions for the O/S/V scales with the given correlations
-# - Rescale the scores between 15 and 75 for each scale to have total scores
-# - Simulate item scores based on these total scores
-# 
-# (Idea for later: to merge with the VVIQ data, we could sort the OSIVQ data by 
-# the Object score and bind it. This way high VVIQ = high OSIVQ-O.)

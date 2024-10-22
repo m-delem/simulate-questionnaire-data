@@ -19,13 +19,11 @@ intricate computations on synthetic data.
 > [`LikertMakeR`](https://github.com/WinzarH/LikertMakeR) package, which
 > is really comprehensive. Also check out
 > [`latent2likert`](https://github.com/markolalovic/latent2likert) for a
-> more item-based simulation approach. Note: this is not a standalone
+> more item-based simulation approach. *Note: this is not a standalone
 > package because I don’t think the functions add a signficant
 > improvement over those from the packages above, but I like the
 > straightforward solutions I came up with, which is why I document them
-> here. *(I still added them to [my (secret 👀) personal
-> package](https://github.com/m-delem/delemr/) though, to access them
-> quickly without copy-pasting)*
+> here.*[^1]
 
 ``` r
 source("scripts/simulate_questionnaires.R")
@@ -41,7 +39,7 @@ whole population on a multi-item questionnaire based on literature or
 assumptions, ***then*** simulate individual items making up the scale
 (which is the reverse process of more “item-based” approaches like
 [`latent2likert`](https://github.com/markolalovic/latent2likert)). This
-resulted in the `simulate_items` function[^1]: given a score, a number
+resulted in the `simulate_items` function[^2]: given a score, a number
 of items, a minimum and a maximum value, it returns a vector of
 simulated items.
 
@@ -65,7 +63,7 @@ It can be mapped on a distribution to simulate the items for a whole
 sample of subjects.
 
 ``` r
-n_subjects <- 1000
+n_subjects <- 50
 
 # Normal distribution of scores
 df <- 
@@ -74,59 +72,187 @@ df <-
     score = rnorm(n_subjects, mean = 32, sd = 5) |> round()
   ) |>
   rowwise() |> 
-  mutate(item = list(simulate_items(score, 12, 1, 5))) |> 
+  mutate(item = list(simulate_items(score, n_items = 12, min_item = 1, max_item = 5))) |> 
   unnest_wider(item, names_sep = "_")
 
 df |> head() |> display()
 ```
 
-``` r
-# I'd like to create a function that could take these arguments and simulate everything
-df <- simulate_questionnaire(
-  n_subjects = 1000,
-  names = c("subscale_1", "subscale_2"),
-  distrib = c("normal", "skew_normal"),
-  means = c(32, 45),
-  sds = c(5, 7),
-  skews = NULL,
-  cor_mat = NULL,
-  add_items = TRUE
-)
+| subject | score | item_1 | item_2 | item_3 | item_4 | item_5 | item_6 | item_7 | item_8 | item_9 | item_10 | item_11 | item_12 |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 35 | 4 | 1 | 3 | 2 | 1 | 4 | 1 | 5 | 2 | 4 | 3 | 5 |
+| 2 | 23 | 3 | 2 | 5 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 3 | 2 |
+| 3 | 30 | 2 | 2 | 3 | 2 | 1 | 2 | 4 | 2 | 3 | 5 | 2 | 2 |
+| 4 | 34 | 2 | 4 | 3 | 2 | 4 | 3 | 5 | 3 | 2 | 3 | 1 | 2 |
+| 5 | 27 | 2 | 2 | 1 | 3 | 2 | 5 | 3 | 2 | 2 | 1 | 3 | 1 |
+| 6 | 28 | 4 | 1 | 2 | 1 | 4 | 1 | 3 | 3 | 2 | 3 | 1 | 3 |
 
-# if skews is NULL the vector should be 0 times the length of the names vector
-# if cor_mat is NULL the function should not correlate the sub-scales
+On this basis, I created the `simulate_questionnaires` function to
+simulate the scores for:
+
+- A given number of subjects.
+
+- Several scales or sub-scales with different distributions, optionally
+  skewed, which can be correlated[^3].
+
+- Using either the sample mean of total scores (sum of all items, e.g.,
+  M = 45/80) or the sample mean of item scores (e.g., M = 3.5/5).
+
+- Optionally simulating every individual item for each subject with
+  `simulate_items`.
+
+``` r
+df <- 
+  simulate_questionnaires(
+    n_subjects = 1000,
+    names = c("scale_1", "scale_2"),  
+    distrib = c("skew_normal", "normal"), 
+    method = "score_means",
+    means = c(33.2, 24.5),   
+    sds = c(8.2, 4.4),       
+    skews = c(-0.4, 0),
+    corrs = c(0.02),
+    n_items = c(10, 10),
+    min_item = c(1, 1),
+    max_item = c(5, 5),
+    add_items = TRUE,
+    print_corrs = TRUE
+    )
 ```
 
-<!-- It shows methods to: -->
-<!-- -   Simulate score distributions from various types of information (e.g., quantile percentages, means, sd, skewness). -->
-<!-- -   Simulate different distributions for sub-scales or sub-groups in the sample. -->
-<!-- -   Correlate sub-scales with different types of distributions. -->
-<!-- -   Simulate individual ordinal items from the total scores of each subject. -->
+    Expected correlations:
+         [,1] [,2]
+    [1,] 1.00 0.02
+    [2,] 0.02 1.00
 
-The simulation script (`scripts/simulate_questionnaires.R`) is heavily
-commented to explain the rationale behind the code and the choices made.
-The script is also designed to be easily adaptable to other
-questionnaires. `scripts/plot_questionnaires.R` contains two functions
-associated with the questionnaires to provide convenient plotting
-methods.
+    Simulated correlations:
+                  score_scale_1 score_scale_2
+    score_scale_1          1.00          0.03
+    score_scale_2          0.03          1.00
+    Data frame:
 
-## VVIQ and OSIVQ
+``` r
+head(df) |> display()
+```
 
-This repository also contains code to simulate data from two mental
-imagery questionnaires I used often: the [Vividness of Visual Imagery
-Questionnaire
-(VVIQ)](https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/j.2044-8295.1973.tb01322.x)
-and the [Object-Spatial Imagery and Verbal
-Questionnaire](https://onlinelibrary.wiley.com/doi/10.1002/acp.1473).
+| subject | score_scale_1 | score_scale_2 | mean_scale_1 | mean_scale_2 | scale_1_item_1 | scale_1_item_2 | scale_1_item_3 | scale_1_item_4 | scale_1_item_5 | scale_1_item_6 | scale_1_item_7 | scale_1_item_8 | scale_1_item_9 | scale_1_item_10 | scale_2_item_1 | scale_2_item_2 | scale_2_item_3 | scale_2_item_4 | scale_2_item_5 | scale_2_item_6 | scale_2_item_7 | scale_2_item_8 | scale_2_item_9 | scale_2_item_10 |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 47 | 23 | 4.70 | 2.30 | 5 | 3 | 5 | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 2 | 3 | 3 | 2 | 2 | 3 | 2 | 2 | 2 | 2 |
+| 2 | 31 | 33 | 3.10 | 3.30 | 3 | 4 | 2 | 3 | 2 | 2 | 2 | 5 | 3 | 5 | 4 | 4 | 1 | 3 | 3 | 4 | 5 | 3 | 3 | 3 |
+| 3 | 39 | 28 | 3.90 | 2.80 | 1 | 5 | 2 | 3 | 5 | 5 | 5 | 5 | 5 | 3 | 2 | 5 | 4 | 3 | 2 | 4 | 2 | 3 | 2 | 1 |
+| 4 | 39 | 20 | 3.90 | 2.00 | 5 | 2 | 4 | 5 | 4 | 4 | 2 | 3 | 5 | 5 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 3 | 3 | 1 |
+| 5 | 26 | 13 | 2.60 | 1.30 | 1 | 3 | 1 | 4 | 4 | 3 | 1 | 3 | 2 | 4 | 2 | 1 | 2 | 1 | 1 | 1 | 2 | 1 | 1 | 1 |
+| 6 | 45 | 28 | 4.50 | 2.80 | 5 | 5 | 2 | 5 | 5 | 4 | 5 | 5 | 5 | 4 | 3 | 4 | 2 | 3 | 3 | 3 | 3 | 1 | 4 | 2 |
 
-`simulate_vviq` creates a data frame with a given number of subjects,
-simulating VVIQ scores and mean scores for four groups defined in
-aphantasia literature (aphantasia, hypophantasia, typical imagery and
-hyperphantasia, see [Wright et al.,
-2024](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1454107/full)).
-It can optionally simulate individual responses for all of the 16 items
-of the VVIQ for each subject (all responses of course summing to the
-simulated score).
+A plotting function is also provided:
+
+``` r
+scores <- plot_questionnaires(df, var = "score", questionnaire = "Survey")
+means  <- plot_questionnaires(df, var = "mean",  questionnaire = "Survey") 
+
+# Laying out the four plots with the `patchwork` package
+scores + means + plot_layout(guides = "collect")
+```
+
+![](README_files/figure-commonmark/plot-questionnaires-1.png)
+
+## OSIVQ example
+
+Let’s see a more realistic simulation for a cognitive styles
+questionnaire I use often: the Object-Spatial Imagery and Verbal
+Questionnaire (OSIVQ, [Blazhenkova & Kozhevnikov,
+2009](https://onlinelibrary.wiley.com/doi/10.1002/acp.1473)). The OSIVQ
+has 45 items divided into three scales with 15 items each and the
+following properties:
+
+- Object scale (OSIVQ-O), M = 3.63, SD = 0.62
+- Spatial scale (OSIVQ-S), M = 2.83, SD = 0.66
+- Verbal scale (OSIVQ-V), M = 3.00, SD = 0.68
+
+B & K also precise that the OSIVQ-O is negatively skewed with Skewness =
+-.392, the other two being normally distributed. They report that O and
+S have a correlation of -0.03, O and V 0.12, and S and V -0.18.
+
+``` r
+df_osivq <- 
+  simulate_questionnaires(
+    n_subjects = 1000,
+    names = c("osivq_o", "osivq_s", "osivq_v"),  
+    distrib = c("skew_normal", "normal", "normal"), 
+    method = "item_means",
+    means = c(3.63, 2.83, 3),   
+    sds = c(0.62, 0.66, 0.68),       
+    skews = c(-0.392, 0, 0),
+    corrs = c(-0.03, 0.12, -0.18),
+    n_items = c(15, 15, 15),
+    min_item = c(1, 1, 1),
+    max_item = c(5, 5, 5),
+    add_items = FALSE,
+    print_corrs = TRUE
+    )
+```
+
+    Expected correlations:
+          [,1]  [,2]  [,3]
+    [1,]  1.00 -0.03  0.12
+    [2,] -0.03  1.00 -0.18
+    [3,]  0.12 -0.18  1.00
+
+    Simulated correlations:
+                 mean_osivq_o mean_osivq_s mean_osivq_v
+    mean_osivq_o         1.00        -0.04         0.07
+    mean_osivq_s        -0.04         1.00        -0.15
+    mean_osivq_v         0.07        -0.15         1.00
+    Data frame:
+
+``` r
+head(df_osivq) |> display()
+```
+
+| subject | score_osivq_o | score_osivq_s | score_osivq_v | mean_osivq_o | mean_osivq_s | mean_osivq_v |
+|:---|---:|---:|---:|---:|---:|---:|
+| 1 | 60 | 44 | 40 | 4.00 | 2.95 | 2.72 |
+| 2 | 53 | 69 | 47 | 3.58 | 4.62 | 3.17 |
+| 3 | 51 | 42 | 47 | 3.45 | 2.85 | 3.18 |
+| 4 | 59 | 44 | 54 | 3.95 | 2.96 | 3.66 |
+| 5 | 55 | 41 | 45 | 3.72 | 2.75 | 3.06 |
+| 6 | 53 | 48 | 65 | 3.58 | 3.26 | 4.39 |
+
+``` r
+osivq_scores <- plot_questionnaires(df_osivq, var = "score", questionnaire = "OSIVQ")
+osivq_means  <- plot_questionnaires(df_osivq, var = "mean", questionnaire = "OSIVQ")
+
+osivq_scores + osivq_means + plot_layout(guides = "collect")
+```
+
+![](README_files/figure-commonmark/plot-osivq-1.png)
+
+This looks pretty similar to the data presented in the original article!
+:tada:
+
+## VVIQ
+
+This repository also contains code to simulate data for the [Vividness
+of Visual Imagery Questionnaire
+(VVIQ)](https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/j.2044-8295.1973.tb01322.x).
+This task was pretty specific because the distribution of the VVIQ is
+not normal and I did not have precise statistical parameters from the
+literature, only general visual imagery prevalence data. According to
+[Wright et al.,
+2024](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1454107/full),
+the VVIQ distribution has the following characteristics:
+
+- 0.9% of the population score 16 (aphantasia)
+- 3.3% score between 17 and 32 (hypophantasia)
+- 89.7% score between 33 and 74 (typical imagery)
+- 6.1% score between 75 and 80 (hyperphantasia)
+
+… And that’s it. I had to solve this by creating four distributions, one
+for each group, and then sample from this mixture of distributions. This
+resulted in the `simulate_vviq` function, which creates a data frame
+with a given number of subjects, simulates VVIQ total and mean scores
+for the four groups, and optionally simulates each item’s scores with
+the `simulate_items` function.
 
 ``` r
 df_vviq <- simulate_vviq(n_subjects = 1000, add_items = TRUE)
@@ -139,59 +265,28 @@ df_vviq |>
 
 | subject | group | score_vviq | mean_vviq | vviq_item_1 | vviq_item_2 | vviq_item_3 | vviq_item_4 | vviq_item_5 | vviq_item_6 | vviq_item_7 | vviq_item_8 | vviq_item_9 | vviq_item_10 | vviq_item_11 | vviq_item_12 | vviq_item_13 | vviq_item_14 | vviq_item_15 | vviq_item_16 |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 18 | aph | 16 | 1.00 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
-| 24 | hypo | 29 | 1.81 | 1 | 1 | 1 | 1 | 1 | 2 | 4 | 1 | 4 | 2 | 1 | 2 | 3 | 2 | 1 | 2 |
-| 1 | typical | 52 | 3.25 | 2 | 3 | 5 | 5 | 4 | 4 | 1 | 4 | 3 | 5 | 4 | 3 | 1 | 4 | 1 | 3 |
-| 17 | hyper | 77 | 4.81 | 5 | 4 | 5 | 4 | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
+| 105 | aph | 16 | 1.00 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| 17 | hypo | 32 | 2.00 | 1 | 2 | 5 | 1 | 1 | 1 | 1 | 4 | 2 | 5 | 2 | 1 | 2 | 2 | 1 | 1 |
+| 1 | typical | 67 | 4.19 | 2 | 5 | 5 | 5 | 5 | 2 | 2 | 5 | 5 | 5 | 5 | 4 | 5 | 5 | 2 | 5 |
+| 24 | hyper | 78 | 4.88 | 5 | 5 | 3 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
 
-`simulate_osivq` does the same for the OSIVQ, which comprises three
-sub-scales: Object, Spatial and Verbal. There are no conventional
-thresholds to define groups for this questionnaire.
-
-``` r
-df_osivq <- simulate_osivq(n_subjects = 1000, add_items = TRUE)
-
-df_osivq |> 
-  head() |> 
-  display()
-```
-
-| mean_object | mean_spatial | mean_verbal | score_object | score_spatial | score_verbal | osivq_item_o_1 | osivq_item_o_2 | osivq_item_o_3 | osivq_item_o_4 | osivq_item_o_5 | osivq_item_o_6 | osivq_item_o_7 | osivq_item_o_8 | osivq_item_o_9 | osivq_item_o_10 | osivq_item_o_11 | osivq_item_o_12 | osivq_item_o_13 | osivq_item_o_14 | osivq_item_o_15 | osivq_item_s_1 | osivq_item_s_2 | osivq_item_s_3 | osivq_item_s_4 | osivq_item_s_5 | osivq_item_s_6 | osivq_item_s_7 | osivq_item_s_8 | osivq_item_s_9 | osivq_item_s_10 | osivq_item_s_11 | osivq_item_s_12 | osivq_item_s_13 | osivq_item_s_14 | osivq_item_s_15 | osivq_item_v_1 | osivq_item_v_2 | osivq_item_v_3 | osivq_item_v_4 | osivq_item_v_5 | osivq_item_v_6 | osivq_item_v_7 | osivq_item_v_8 | osivq_item_v_9 | osivq_item_v_10 | osivq_item_v_11 | osivq_item_v_12 | osivq_item_v_13 | osivq_item_v_14 | osivq_item_v_15 |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3.55 | 2.68 | 3.41 | 53 | 40 | 51 | 5 | 4 | 3 | 3 | 3 | 5 | 3 | 4 | 1 | 2 | 4 | 5 | 1 | 5 | 5 | 2 | 3 | 2 | 1 | 5 | 1 | 5 | 3 | 2 | 2 | 2 | 2 | 2 | 3 | 5 | 4 | 5 | 3 | 5 | 3 | 1 | 4 | 5 | 2 | 5 | 3 | 1 | 3 | 5 | 2 |
-| 3.55 | 2.35 | 0.93 | 53 | 35 | 15 | 5 | 5 | 5 | 4 | 4 | 5 | 4 | 1 | 5 | 2 | 3 | 4 | 4 | 1 | 1 | 1 | 3 | 2 | 1 | 5 | 2 | 2 | 2 | 3 | 1 | 4 | 3 | 2 | 1 | 3 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
-| 3.83 | 1.45 | 2.98 | 57 | 21 | 44 | 5 | 5 | 2 | 1 | 4 | 5 | 4 | 1 | 5 | 2 | 5 | 5 | 5 | 3 | 5 | 2 | 1 | 1 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 2 | 2 | 1 | 3 | 2 | 3 | 3 | 2 | 4 | 4 | 2 | 4 | 2 | 2 | 3 | 2 | 5 | 5 | 1 |
-| 5.26 | 3.92 | 4.11 | 75 | 58 | 61 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 3 | 5 | 5 | 4 | 4 | 4 | 5 | 3 | 2 | 3 | 5 | 5 | 1 | 4 | 2 | 4 | 5 | 3 | 5 | 5 | 4 | 5 | 4 | 5 | 3 | 3 | 5 | 3 | 5 |
-| 4.22 | 3.09 | 1.43 | 63 | 46 | 21 | 5 | 5 | 3 | 3 | 3 | 5 | 5 | 5 | 5 | 3 | 3 | 5 | 5 | 3 | 5 | 4 | 4 | 3 | 2 | 2 | 1 | 2 | 5 | 1 | 3 | 3 | 5 | 5 | 2 | 4 | 2 | 3 | 1 | 1 | 1 | 1 | 2 | 2 | 1 | 1 | 2 | 1 | 1 | 1 | 1 |
-| 3.11 | 2.30 | 2.64 | 46 | 34 | 39 | 2 | 2 | 2 | 5 | 1 | 2 | 2 | 3 | 5 | 3 | 3 | 4 | 3 | 5 | 4 | 2 | 3 | 1 | 1 | 4 | 1 | 2 | 3 | 2 | 1 | 4 | 3 | 3 | 2 | 2 | 4 | 5 | 1 | 3 | 1 | 3 | 1 | 3 | 2 | 4 | 2 | 2 | 3 | 2 | 3 |
-
-Two plotting functions, `plot_vviq` and `plot_osivq`, are provided to
-plot the distributions of the scores and means of the VVIQ and OSIVQ,
-respectively. They can be called with the argument `print = TRUE` to
-display the plot directly in the console. In any case, they return a
-ggplot object that can be further customized.
+A `plot_vviq` function is also provided to plot the distributions of the
+scores and means of the VVIQ.
 
 ``` r
 vviq_scores <- df_vviq |> plot_vviq(var = "score", print = FALSE)
 vviq_means  <- df_vviq |> plot_vviq(var = "mean", print = FALSE) + 
   labs(title = NULL, y = NULL)
 
-osivq_scores <- df_osivq |> plot_osivq(var = "score", print = FALSE)
-osivq_means  <- df_osivq |> plot_osivq(var = "mean", print = FALSE) + 
-  labs(title = NULL, y = NULL)
-
-# Laying out the four plots with the `patchwork` package
-(vviq_scores + vviq_means) / (osivq_scores + osivq_means) + 
-  plot_layout(guides = "collect")
+vviq_scores + vviq_means + plot_layout(guides = "collect") & theme(legend.position = "bottom")
 ```
 
 ![](README_files/figure-commonmark/plot_vviq-1.png)
 
 I believe the structures presented in these scripts could be useful to
-anyone who needs to simulate Likert-type questionnaire data. The scripts
-are designed to be easily adaptable to other questionnaires and can be
-used as templates to build your own simulation scripts. I hope they will
-be useful to you! :cherry_blossom:
+anyone who needs to simulate Likert-type questionnaire data or draw some
+inspiration to do it. I hope they will be useful to you!
+:cherry_blossom:
 
 > Note: this repository is a Quarto project endowed with a `renv` R
 > environment to ensure the stability of the packages used. The
@@ -200,5 +295,15 @@ be useful to you! :cherry_blossom:
 > a quick tutorial to use this project structure and an in-depth
 > explanation of its elements in the README of the template.
 
-[^1]: The function is close in its purpose to the `makeItemsScale` from
+[^1]: I still added them to [my (secret 👀) personal
+    package](https://github.com/m-delem/delemr/) though, to access them
+    quickly without copy-pasting.
+
+[^2]: The function is close in its purpose to the `makeItemsScale` from
     the `LikertMakeR` package.
+
+[^3]: Conceptually, this could be a simulation of multiple correlated
+    questionnaires (Q1 with several items on a construct correlated with
+    Q2 on another construct) or a questionnaire with correlated
+    sub-scales… Or both at the same time, just name your scales however
+    you want.

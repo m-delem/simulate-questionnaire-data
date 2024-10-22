@@ -6,8 +6,7 @@ source("scripts/simulate_questionnaires.R")
 plot_questionnaires <- function(
     df, 
     var = "score", 
-    questionnaire = "questionnaire", 
-    print = FALSE
+    questionnaire = "questionnaire"
 ) {
   
   if (!(var %in% c("score", "mean"))){
@@ -58,8 +57,6 @@ plot_questionnaires <- function(
       axis.text.x = element_text(size = 10),
       axis.ticks.x = element_line(),
     )
-  
-  if (print) print(p)
   
   return(p)
 }
