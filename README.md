@@ -147,16 +147,16 @@ head(df) |> display()
 A plotting function is also provided:
 
 ``` r
-scores <- plot_questionnaires(df, var = "score", questionnaire = "Survey")
-means  <- plot_questionnaires(df, var = "mean",  questionnaire = "Survey") 
+scores <- plot_questionnaires(df, var = "score", questionnaire = "survey")
+means  <- plot_questionnaires(df, var = "mean",  questionnaire = "survey") 
 
-# Laying out the four plots with the `patchwork` package
+# Laying out the plots with the `patchwork` package
 scores + means + plot_layout(guides = "collect")
 ```
 
 ![](README_files/figure-commonmark/plot-questionnaires-1.png)
 
-## OSIVQ example
+## Example simulation of the OSIVQ
 
 Let’s see a more realistic simulation for a cognitive styles
 questionnaire I use often: the Object-Spatial Imagery and Verbal
@@ -232,9 +232,9 @@ This looks pretty similar to the data presented in the original article!
 
 ## VVIQ
 
-This repository also contains code to simulate data for the [Vividness
-of Visual Imagery Questionnaire
-(VVIQ)](https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/j.2044-8295.1973.tb01322.x).
+This repository also contains code to simulate data for the Vividness of
+Visual Imagery Questionnaire (VVIQ, [Marks,
+1973](https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/j.2044-8295.1973.tb01322.x)).
 This task was pretty specific because the distribution of the VVIQ is
 not normal and I did not have precise statistical parameters from the
 literature, only general visual imagery prevalence data. According to

@@ -98,14 +98,14 @@ A plotting function is also provided:
 #| fig-width: 12
 #| fig-height: 5
 
-scores <- plot_questionnaires(df, var = "score", questionnaire = "Survey")
-means  <- plot_questionnaires(df, var = "mean",  questionnaire = "Survey") 
+scores <- plot_questionnaires(df, var = "score", questionnaire = "survey")
+means  <- plot_questionnaires(df, var = "mean",  questionnaire = "survey") 
 
-# Laying out the four plots with the `patchwork` package
+# Laying out the plots with the `patchwork` package
 scores + means + plot_layout(guides = "collect")
 ```
 
-## OSIVQ example
+## Example simulation of the OSIVQ
 
 Let's see a more realistic simulation for a cognitive styles questionnaire I use often: the Object-Spatial Imagery and Verbal Questionnaire (OSIVQ, [Blazhenkova & Kozhevnikov, 2009](https://onlinelibrary.wiley.com/doi/10.1002/acp.1473)). The OSIVQ has 45 items divided into three scales with 15 items each and the following properties:
 
@@ -153,7 +153,7 @@ This looks pretty similar to the data presented in the original article! :tada:
 
 ## VVIQ
 
-This repository also contains code to simulate data for the [Vividness of Visual Imagery Questionnaire (VVIQ)](https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/j.2044-8295.1973.tb01322.x). This task was pretty specific because the distribution of the VVIQ is not normal and I did not have precise statistical parameters from the literature, only general visual imagery prevalence data. According to [Wright et al., 2024](<https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1454107/full>), the VVIQ distribution has the following
+This repository also contains code to simulate data for the Vividness of Visual Imagery Questionnaire (VVIQ, [Marks, 1973](https://bpspsychub.onlinelibrary.wiley.com/doi/10.1111/j.2044-8295.1973.tb01322.x)). This task was pretty specific because the distribution of the VVIQ is not normal and I did not have precise statistical parameters from the literature, only general visual imagery prevalence data. According to [Wright et al., 2024](<https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1454107/full>), the VVIQ distribution has the following
 characteristics:
 
 - 0.9% of the population score 16 (aphantasia)
