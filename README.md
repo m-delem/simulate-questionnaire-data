@@ -227,8 +227,7 @@ osivq_scores + osivq_means + plot_layout(guides = "collect")
 
 ![](README_files/figure-commonmark/plot-osivq-1.png)
 
-This looks pretty similar to the data presented in the original article!
-:tada:
+This looks pretty similar to the data presented in the original article! :tada:
 
 ## VVIQ
 
@@ -285,8 +284,7 @@ vviq_scores + vviq_means + plot_layout(guides = "collect") & theme(legend.positi
 
 I believe the structures presented in these scripts could be useful to
 anyone who needs to simulate Likert-type questionnaire data or draw some
-inspiration to do it. I hope they will be useful to you!
-:cherry_blossom:
+inspiration to do it. I hope they will be useful to you! :cherry_blossom:
 
 > Note: this repository is a Quarto project endowed with a `renv` R
 > environment to ensure the stability of the packages used. The
