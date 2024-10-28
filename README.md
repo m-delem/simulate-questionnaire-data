@@ -75,7 +75,7 @@ df <-
   mutate(item = list(simulate_items(score, n_items = 12, min_item = 1, max_item = 5))) |> 
   unnest_wider(item, names_sep = "_")
 
-df |> head() |> display()
+display(head(df))
 ```
 
 | subject | score | item_1 | item_2 | item_3 | item_4 | item_5 | item_6 | item_7 | item_8 | item_9 | item_10 | item_11 | item_12 |
@@ -132,7 +132,7 @@ df <-
     Data frame:
 
 ``` r
-head(df) |> display()
+display(head(df))
 ```
 
 | subject | score_scale_1 | score_scale_2 | mean_scale_1 | mean_scale_2 | scale_1_item_1 | scale_1_item_2 | scale_1_item_3 | scale_1_item_4 | scale_1_item_5 | scale_1_item_6 | scale_1_item_7 | scale_1_item_8 | scale_1_item_9 | scale_1_item_10 | scale_2_item_1 | scale_2_item_2 | scale_2_item_3 | scale_2_item_4 | scale_2_item_5 | scale_2_item_6 | scale_2_item_7 | scale_2_item_8 | scale_2_item_9 | scale_2_item_10 |
@@ -206,7 +206,7 @@ df_osivq <-
     Data frame:
 
 ``` r
-head(df_osivq) |> display()
+display(head(df_osivq))
 ```
 
 | subject | score_osivq_o | score_osivq_s | score_osivq_v | mean_osivq_o | mean_osivq_s | mean_osivq_v |
@@ -227,7 +227,8 @@ osivq_scores + osivq_means + plot_layout(guides = "collect")
 
 ![](README_files/figure-commonmark/plot-osivq-1.png)
 
-This looks pretty similar to the data presented in the original article! :tada:
+This looks pretty similar to the data presented in the original article!
+:tada:
 
 ## VVIQ
 
@@ -284,7 +285,8 @@ vviq_scores + vviq_means + plot_layout(guides = "collect") & theme(legend.positi
 
 I believe the structures presented in these scripts could be useful to
 anyone who needs to simulate Likert-type questionnaire data or draw some
-inspiration to do it. I hope they will be useful to you! :cherry_blossom:
+inspiration to do it. I hope they will be useful to you!
+:cherry_blossom:
 
 > Note: this repository is a Quarto project endowed with a `renv` R
 > environment to ensure the stability of the packages used. The

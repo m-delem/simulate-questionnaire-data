@@ -53,7 +53,7 @@ df <-
   mutate(item = list(simulate_items(score, n_items = 12, min_item = 1, max_item = 5))) |> 
   unnest_wider(item, names_sep = "_")
 
-df |> head() |> display()
+display(head(df))
 ```
 
 On this basis, I created the `simulate_questionnaires` function to simulate the scores for:
@@ -88,7 +88,7 @@ df <-
     print_corrs = TRUE
     )
 
-head(df) |> display()
+display(head(df))
 ```
 
 A plotting function is also provided:
@@ -135,7 +135,7 @@ df_osivq <-
     print_corrs = TRUE
     )
 
-head(df_osivq) |> display()
+display(head(df_osivq))
 ```
 
 ```{r}
