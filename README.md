@@ -23,7 +23,7 @@ intricate computations on synthetic data.
 > package because I don’t think the functions add a signficant
 > improvement over those from the packages above, but I like the
 > straightforward solutions I came up with, which is why I document them
-> here.*[^1]
+> here.*
 
 ``` r
 source("scripts/simulate_questionnaires.R")
@@ -39,7 +39,7 @@ whole population on a multi-item questionnaire based on literature or
 assumptions, ***then*** simulate individual items making up the scale
 (which is the reverse process of more “item-based” approaches like
 [`latent2likert`](https://github.com/markolalovic/latent2likert)). This
-resulted in the `simulate_items` function[^2]: given a score, a number
+resulted in the `simulate_items` function[^1]: given a score, a number
 of items, a minimum and a maximum value, it returns a vector of
 simulated items.
 
@@ -93,7 +93,7 @@ simulate the scores for:
 - A given number of subjects.
 
 - Several scales or sub-scales with different distributions, optionally
-  skewed, which can be correlated[^3].
+  skewed, which can be correlated[^2].
 
 - Using either the sample mean of total scores (sum of all items, e.g.,
   M = 45/80) or the sample mean of item scores (e.g., M = 3.5/5).
@@ -295,14 +295,10 @@ inspiration to do it. I hope they will be useful to you!
 > a quick tutorial to use this project structure and an in-depth
 > explanation of its elements in the README of the template.
 
-[^1]: I still added them to [my (secret 👀) personal
-    package](https://github.com/m-delem/delemr/) though, to access them
-    quickly without copy-pasting.
-
-[^2]: The function is close in its purpose to the `makeItemsScale` from
+[^1]: The function is close in its purpose to the `makeItemsScale` from
     the `LikertMakeR` package.
 
-[^3]: Conceptually, this could be a simulation of multiple correlated
+[^2]: Conceptually, this could be a simulation of multiple correlated
     questionnaires (Q1 with several items on a construct correlated with
     Q2 on another construct) or a questionnaire with correlated
     sub-scales… Or both at the same time, just name your scales however
